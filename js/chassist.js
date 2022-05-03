@@ -1,4 +1,16 @@
-import { Chess, SQUARES } from "./chess.js";
+import {
+  Chess,
+  SQUARES,
+  PAWN,
+  ROOK,
+  KING,
+  KNIGHT,
+  QUEEN,
+  BISHOP,
+  PAWN_OFFSETS,
+  PIECE_OFFSETS,
+  SQUARE_MAP,
+} from "./chess.js";
 
 var board = null;
 var game = new Chess();
@@ -13,27 +25,46 @@ function calcAssistValues() {
   }
 
   for (var i = 0; i < ASSIST_VALUES.length; i++) {
-    calcAssistValueForPieceOnSquare(SQUARES[i]);
+    calcAssistValueForPieceOnSquare(i);
   }
 
   updateAssistValues();
 }
 
-function calcAssistValueForPieceOnSquare(square) {
-  const squareContent = game.get(square);
+function validSquare(index) {
+  return index > 0 && index < 64;
+}
+
+function marklndeces(indeces) {
+  for (const index of indeces) {
+    if (validSquare(index)) ASSIST_VALUES[index]++;
+  }
+}
+
+// Go through all squares and check for pieces. For each piece mark all the squares it defends
+function calcAssistValueForPieceOnSquare(squareIndex) {
+  const squareContent = game.get(SQUARES[squareIndex]);
   if (squareContent) {
-    switch (squareContent.piece) {
-      case game.PAWN:
+    switch (squareContent?.type) {
+      case PAWN:
+        if (squareContent.color === "w") {
+          // top left square is -9, top right is -7
+          var possibleIndeces = [squareIndex - 9, squareIndex - 7];
+          marklndeces(possibleIndeces);
+        } else {
+        }
         break;
-      case game.KNIGHT:
+      case KNIGHT:
         break;
-      case game.BISHOP:
+      case BISHOP:
         break;
-      case game.ROOK:
+      case ROOK:
         break;
-      case game.QUEEN:
+      case QUEEN:
         break;
-      case game.KING:
+      case KING:
+        break;
+      default:
         break;
     }
   }
