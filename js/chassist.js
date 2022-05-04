@@ -54,6 +54,7 @@ function calcAssistValueForPieceOnSquare(squareIndex) {
     switch (squareContent?.type) {
       case PAWN:
         var indecesToMark = [];
+        // use the square map to easier calculate if a possible move is still on the board
         const squareMapVal = SQUARE_MAP[SQUARES[squareIndex]];
         for (
           let index = 2;
@@ -65,12 +66,11 @@ function calcAssistValueForPieceOnSquare(squareIndex) {
           const hasValue = Object.values(SQUARE_MAP).includes(currentOffset);
           if (hasValue) {
             const field = getKeyByValue(SQUARE_MAP, currentOffset);
-            const iindexOfField = getKeyByValue(SQUARES, field);
-            indecesToMark.push(iindexOfField);
+            const indexOfField = getKeyByValue(SQUARES, field);
+            indecesToMark.push(indexOfField);
           }
-
-          marklndeces(indecesToMark);
         }
+        marklndeces(indecesToMark);
         break;
       case KNIGHT:
         break;
