@@ -18,19 +18,7 @@ const ASSIST_VALUES = new Array(64); // mapping to chess board via SQUARES
 const ASSIST_CLASS = "assist";
 $("#assistBtn").on("click", calcAssistValues);
 
-function calcAssistValues() {
-  // zero init array
-  for (var i = 0; i < ASSIST_VALUES.length; i++) {
-    ASSIST_VALUES[i] = 0;
-  }
-
-  for (var i = 0; i < ASSIST_VALUES.length; i++) {
-    calcAssistValueForPieceOnSquare(i);
-  }
-
-  updateAssistValues();
-}
-
+// utility funcitons
 function validSquare(index) {
   return index > 0 && index < 64;
 }
@@ -46,45 +34,86 @@ function marklndeces(indeces) {
 function getKeyByValue(object, value) {
   return Object.keys(object).find((key) => object[key] === value);
 }
+// -----------------------------
+
+function calcAssistValues() {
+  // zero init array / reset
+  for (var i = 0; i < ASSIST_VALUES.length; i++) {
+    ASSIST_VALUES[i] = 0;
+  }
+
+  for (var i = 0; i < ASSIST_VALUES.length; i++) {
+    calcAssistValueForPieceOnSquare(i);
+  }
+
+  updateAssistValues();
+}
+
+// Checks the possible attacks of a given pawn and returns the indices of the squares it defends/attacks
+// The indices refer to SQUARES
+function getPawnOffsetIndices(squareIndex, squareContent) {
+  var indicesToMark = [];
+  // use the square map to easier calculate if a possible move is still on the board
+  const squareMapVal = SQUARE_MAP[SQUARES[squareIndex]];
+  for (
+    let index = 2; // start at 2 to ignore the normal pawn moves
+    index < PAWN_OFFSETS[squareContent.color].length;
+    index++
+  ) {
+    const currentOffset =
+      squareMapVal + PAWN_OFFSETS[squareContent.color][index];
+    const hasValue = Object.values(SQUARE_MAP).includes(currentOffset);
+    if (hasValue) {
+      const field = getKeyByValue(SQUARE_MAP, currentOffset);
+      const indexOfField = getKeyByValue(SQUARES, field);
+      indicesToMark.push(indexOfField);
+    }
+  }
+  return indicesToMark;
+}
+// Checks the possible moves of a given piece and returns the indices of the squares it defends/attacks
+// The indices refer to SQUARES
+function getPieceOffsetIndices(squareIndex, squareContent) {
+  var indicesToMark = [];
+  const squareMapVal = SQUARE_MAP[SQUARES[squareIndex]];
+  // use the square map to easier calculate if a possible move is still on the board
+  for (
+    let index = 0;
+    index < PIECE_OFFSETS[squareContent.type].length;
+    index++
+  ) {
+    const currentOffset =
+      squareMapVal + PIECE_OFFSETS[squareContent.type][index];
+    const hasValue = Object.values(SQUARE_MAP).includes(currentOffset);
+    if (hasValue) {
+      const field = getKeyByValue(SQUARE_MAP, currentOffset);
+      const indexOfField = getKeyByValue(SQUARES, field);
+      indicesToMark.push(indexOfField);
+    }
+  }
+  return indicesToMark;
+}
 
 // Go through all squares and check for pieces. For each piece mark all the squares it defends
 function calcAssistValueForPieceOnSquare(squareIndex) {
   const squareContent = game.get(SQUARES[squareIndex]);
   if (squareContent) {
+    var indicesToMark = [];
     switch (squareContent?.type) {
       case PAWN:
-        var indecesToMark = [];
-        // use the square map to easier calculate if a possible move is still on the board
-        const squareMapVal = SQUARE_MAP[SQUARES[squareIndex]];
-        for (
-          let index = 2;
-          index < PAWN_OFFSETS[squareContent.color].length;
-          index++
-        ) {
-          const currentOffset =
-            squareMapVal + PAWN_OFFSETS[squareContent.color][index];
-          const hasValue = Object.values(SQUARE_MAP).includes(currentOffset);
-          if (hasValue) {
-            const field = getKeyByValue(SQUARE_MAP, currentOffset);
-            const indexOfField = getKeyByValue(SQUARES, field);
-            indecesToMark.push(indexOfField);
-          }
-        }
-        marklndeces(indecesToMark);
+        indicesToMark = getPawnOffsetIndices(squareIndex, squareContent);
         break;
       case KNIGHT:
-        break;
       case BISHOP:
-        break;
       case ROOK:
-        break;
       case QUEEN:
-        break;
       case KING:
+        indicesToMark = getPieceOffsetIndices(squareIndex, squareContent);
         break;
       default:
         break;
     }
+    marklndeces(indicesToMark);
   }
 }
 
@@ -97,6 +126,9 @@ function updateAssistValues() {
 }
 
 function checkChildrenForAssist(squareDOM, squareIndex) {
+  if (squareDOM.length < 1) {
+    return; // skip when calles before board is rendered
+  }
   var foundAssist = false;
   const children = squareDOM[0].children;
   for (const child of children) {
@@ -113,9 +145,17 @@ function checkChildrenForAssist(squareDOM, squareIndex) {
     squareDOM.append(node);
   }
 }
+
+function onDrop(source, target, piece, newPos, oldPos, orientation) {
+  game.move({ from: source, to: target });
+  console.log(game.fen());
+}
+
 var config = {
   draggable: true,
   position: "start",
+  onChange: calcAssistValues,
+  onDrop: onDrop,
 };
 board = Chessboard("myBoard", config);
 // --- End Example JS ----------------------------------------------------------
