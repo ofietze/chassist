@@ -32,12 +32,12 @@ const DEFAULT_POSITION =
 
 const TERMINATION_MARKERS = ["1-0", "0-1", "1/2-1/2", "*"];
 
-const PAWN_OFFSETS = {
+export const PAWN_OFFSETS = {
   b: [16, 32, 17, 15],
   w: [-16, -32, -17, -15],
 };
 
-const PIECE_OFFSETS = {
+export const PIECE_OFFSETS = {
   n: [-18, -33, -31, -14, 18, 33, 31, 14],
   b: [-17, -15, 17, 15],
   r: [-16, 1, 16, -1],
@@ -105,7 +105,7 @@ const RANK_7 = 1;
 const RANK_8 = 0;
 
 // prettier-ignore
-const SQUARE_MAP = {
+export const SQUARE_MAP = {
   a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
   a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
   a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,

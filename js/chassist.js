@@ -36,9 +36,15 @@ function validSquare(index) {
 }
 
 function marklndeces(indeces) {
-  for (const index of indeces) {
-    if (validSquare(index)) ASSIST_VALUES[index]++;
+  if (indeces) {
+    for (const index of indeces) {
+      if (validSquare(index)) ASSIST_VALUES[index]++;
+    }
   }
+}
+
+function getKeyByValue(object, value) {
+  return Object.keys(object).find((key) => object[key] === value);
 }
 
 // Go through all squares and check for pieces. For each piece mark all the squares it defends
@@ -47,11 +53,23 @@ function calcAssistValueForPieceOnSquare(squareIndex) {
   if (squareContent) {
     switch (squareContent?.type) {
       case PAWN:
-        if (squareContent.color === "w") {
-          // top left square is -9, top right is -7
-          var possibleIndeces = [squareIndex - 9, squareIndex - 7];
-          marklndeces(possibleIndeces);
-        } else {
+        var indecesToMark = [];
+        const squareMapVal = SQUARE_MAP[SQUARES[squareIndex]];
+        for (
+          let index = 2;
+          index < PAWN_OFFSETS[squareContent.color].length;
+          index++
+        ) {
+          const currentOffset =
+            squareMapVal + PAWN_OFFSETS[squareContent.color][index];
+          const hasValue = Object.values(SQUARE_MAP).includes(currentOffset);
+          if (hasValue) {
+            const field = getKeyByValue(SQUARE_MAP, currentOffset);
+            const iindexOfField = getKeyByValue(SQUARES, field);
+            indecesToMark.push(iindexOfField);
+          }
+
+          marklndeces(indecesToMark);
         }
         break;
       case KNIGHT:
