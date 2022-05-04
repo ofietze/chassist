@@ -10,9 +10,11 @@ import {
   PAWN_OFFSETS,
   PIECE_OFFSETS,
   SQUARE_MAP,
+  WHITE,
 } from "./chess.js";
 
 var board = null;
+var board1 = null;
 var game = new Chess();
 const ASSIST_VALUES = new Array(64); // mapping to chess board via SQUARES
 const ASSIST_CLASS = "assist";
@@ -23,10 +25,12 @@ function validSquare(index) {
   return index > 0 && index < 64;
 }
 
-function marklndeces(indeces) {
+function marklndeces(indeces, color) {
   if (indeces) {
     for (const index of indeces) {
-      if (validSquare(index)) ASSIST_VALUES[index]++;
+      if (validSquare(index)) {
+        color === WHITE ? ASSIST_VALUES[index]++ : ASSIST_VALUES[index]--;
+      }
     }
   }
 }
@@ -37,6 +41,12 @@ function getKeyByValue(object, value) {
 // -----------------------------
 
 function calcAssistValues() {
+  const fenInput = $("#fenInput").val();
+  if (fenInput.length > 0) {
+    if (game.load(fenInput)) {
+      board = new Chessboard("board", fenInput);
+    }
+  }
   // zero init array / reset
   for (var i = 0; i < ASSIST_VALUES.length; i++) {
     ASSIST_VALUES[i] = 0;
@@ -113,15 +123,38 @@ function calcAssistValueForPieceOnSquare(squareIndex) {
       default:
         break;
     }
-    marklndeces(indicesToMark);
+    marklndeces(indicesToMark, squareContent.color);
   }
 }
 
 function updateAssistValues() {
   for (const square of SQUARES) {
-    var $square = $("#myBoard .square-" + square);
+    var $square = $("#board .square-" + square);
     const piece = game.get(square);
     checkChildrenForAssist($square, SQUARES.indexOf(square));
+
+    var $square1 = $("#board1 .square-" + square);
+    checkChildrenForAssistAlternative($square1, SQUARES.indexOf(square));
+  }
+}
+function checkChildrenForAssistAlternative(squareDOM, squareIndex) {
+  if (squareDOM.length < 1) {
+    return; // skip when calles before board is rendered
+  }
+  var foundAssist = false;
+  const children = squareDOM[0].children;
+  for (const child of children) {
+    if (child.className.includes(ASSIST_CLASS)) {
+      foundAssist = true;
+      child.innerHTML = ASSIST_VALUES[squareIndex];
+    }
+  }
+
+  if (!foundAssist) {
+    const node = document.createElement("div");
+    node.innerHTML = ASSIST_VALUES[squareIndex];
+    node.className = ASSIST_CLASS;
+    squareDOM.append(node);
   }
 }
 
@@ -157,5 +190,6 @@ var config = {
   onChange: calcAssistValues,
   onDrop: onDrop,
 };
-board = Chessboard("myBoard", config);
+board = new Chessboard("board", config);
+board1 = new Chessboard("board1", config);
 // --- End Example JS ----------------------------------------------------------
