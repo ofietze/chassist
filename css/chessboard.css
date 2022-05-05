@@ -88,7 +88,7 @@ img {
 }
 
 #board {
-  width: 50%;
+  width: 30rem;
 }
 
 input {
@@ -105,4 +105,9 @@ select {
   width: 31.25rem;
   padding: 0.5rem;
   color: #000;
+}
+
+#xBtn {
+  width: 2rem;
+  height: 2rem;
 }

@@ -11,5 +11,4 @@ Using:
 
 ## TODO
 
-- dont use chess.js game state to allow free movement of pieces
 - try different designs for assist values
