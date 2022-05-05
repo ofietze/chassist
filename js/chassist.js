@@ -1,5 +1,4 @@
 import {
-  Chess,
   SQUARES,
   PAWN,
   ROOK,
