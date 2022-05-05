@@ -590,7 +590,7 @@
       !config.hasOwnProperty("pieceTheme") ||
       (!isString(config.pieceTheme) && !isFunction(config.pieceTheme))
     ) {
-      config.pieceTheme = "img/chesspieces/wikipedia/{piece}.png";
+      config.pieceTheme = "chassist/img/chesspieces/wikipedia/{piece}.png";
     }
 
     // animation speeds
@@ -914,7 +914,7 @@
     }
 
     function buildPieceHTML(piece, hidden, id) {
-      var html = '<img src="chassist/' + buildPieceImgSrc(piece) + '" ';
+      var html = '<img src="' + buildPieceImgSrc(piece) + '" ';
       if (isString(id) && id !== "") {
         html += 'id="' + id + '" ';
       }
