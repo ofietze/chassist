@@ -92,10 +92,29 @@ function getPieceOffsetIndices(squareIndex, squareContent) {
     index < PIECE_OFFSETS[squareContent.type].length;
     index++
   ) {
+    if ([QUEEN, ROOK, BISHOP].includes(squareContent.type)) {
+      // check all directions until the edge of the board or until another piece blocks
+      for (let j = 1; j < 8; j++) {
+        const currentOffset =
+          squareMapVal + PIECE_OFFSETS[squareContent.type][index] * j;
+        if (!(currentOffset & 0x88)) {
+          // Useful way to check if offset is in SQUARE_MAP
+          const field = getKeyByValue(SQUARE_MAP, currentOffset);
+          const indexOfField = getKeyByValue(SQUARES, field);
+          indicesToMark.push(indexOfField);
+          if (game.get(field) != null) {
+            break; // found a piec that blocks this path from now on
+          }
+        } else {
+          break; // We are out of bounds and dont need to search this direction further
+        }
+      }
+      continue;
+    }
     const currentOffset =
       squareMapVal + PIECE_OFFSETS[squareContent.type][index];
-    const hasValue = Object.values(SQUARE_MAP).includes(currentOffset);
-    if (hasValue) {
+    if (!(currentOffset & 0x88)) {
+      // Useful way to check if offset is in SQUARE_MAP
       const field = getKeyByValue(SQUARE_MAP, currentOffset);
       const indexOfField = getKeyByValue(SQUARES, field);
       indicesToMark.push(indexOfField);
@@ -111,14 +130,16 @@ function calcAssistValueForPieceOnSquare(squareIndex) {
     var indicesToMark = [];
     switch (squareContent?.type) {
       case PAWN:
-        indicesToMark = getPawnOffsetIndices(squareIndex, squareContent);
+        indicesToMark.push(...getPawnOffsetIndices(squareIndex, squareContent));
         break;
       case KNIGHT:
       case BISHOP:
       case ROOK:
       case QUEEN:
       case KING:
-        indicesToMark = getPieceOffsetIndices(squareIndex, squareContent);
+        indicesToMark.push(
+          ...getPieceOffsetIndices(squareIndex, squareContent)
+        );
         break;
       default:
         break;
