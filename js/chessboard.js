@@ -914,7 +914,7 @@
     }
 
     function buildPieceHTML(piece, hidden, id) {
-      var html = '<img src="' + buildPieceImgSrc(piece) + '" ';
+      var html = '<img src="chassist' + buildPieceImgSrc(piece) + '" ';
       if (isString(id) && id !== "") {
         html += 'id="' + id + '" ';
       }
