@@ -14,13 +14,23 @@ import {
 } from "./chess.js";
 
 var board = null;
-var board1 = null;
 var game = new Chess();
 const ASSIST_VALUES = new Array(64); // mapping to chess board via SQUARES
 const ASSIST_CLASS = "assist";
-$("#assistBtn").on("click", calcAssistValues);
+const LIGHT = "#fff";
+const DARK = "#000";
+const SLIGHTLY_LIGHT = "#aaa";
+const SLIGHTLY_DARK = "#444";
 
-// utility funcitons
+$("#positions").on("change", updateBoard);
+$("#loadBtn").on("click", updateBoard);
+$("#resetBtn").on("click", () => {
+  board = new Chessboard("board", config);
+  game.reset();
+  calcAssistValues();
+});
+
+// utility functions ------------
 function validSquare(index) {
   return index > 0 && index < 64;
 }
@@ -38,15 +48,23 @@ function marklndeces(indeces, color) {
 function getKeyByValue(object, value) {
   return Object.keys(object).find((key) => object[key] === value);
 }
-// -----------------------------
 
-function calcAssistValues() {
+function updateBoard() {
+  const selectedPosition = $("#positions").val();
   const fenInput = $("#fenInput").val();
   if (fenInput.length > 0) {
     if (game.load(fenInput)) {
       board = new Chessboard("board", fenInput);
     }
+  } else if (selectedPosition) {
+    game.load(selectedPosition);
+    board = new Chessboard("board", selectedPosition);
   }
+  calcAssistValues();
+}
+// -----------------------------
+
+function calcAssistValues() {
   // zero init array / reset
   for (var i = 0; i < ASSIST_VALUES.length; i++) {
     ASSIST_VALUES[i] = 0;
@@ -109,15 +127,15 @@ function getPieceOffsetIndices(squareIndex, squareContent) {
           break; // We are out of bounds and dont need to search this direction further
         }
       }
-      continue;
-    }
-    const currentOffset =
-      squareMapVal + PIECE_OFFSETS[squareContent.type][index];
-    if (!(currentOffset & 0x88)) {
-      // Useful way to check if offset is in SQUARE_MAP
-      const field = getKeyByValue(SQUARE_MAP, currentOffset);
-      const indexOfField = getKeyByValue(SQUARES, field);
-      indicesToMark.push(indexOfField);
+    } else {
+      const currentOffset =
+        squareMapVal + PIECE_OFFSETS[squareContent.type][index];
+      if (!(currentOffset & 0x88)) {
+        // Useful way to check if offset is in SQUARE_MAP
+        const field = getKeyByValue(SQUARE_MAP, currentOffset);
+        const indexOfField = getKeyByValue(SQUARES, field);
+        indicesToMark.push(indexOfField);
+      }
     }
   }
   return indicesToMark;
@@ -153,29 +171,25 @@ function updateAssistValues() {
     var $square = $("#board .square-" + square);
     const piece = game.get(square);
     checkChildrenForAssist($square, SQUARES.indexOf(square));
-
-    var $square1 = $("#board1 .square-" + square);
-    checkChildrenForAssistAlternative($square1, SQUARES.indexOf(square));
   }
 }
-function checkChildrenForAssistAlternative(squareDOM, squareIndex) {
-  if (squareDOM.length < 1) {
-    return; // skip when calles before board is rendered
-  }
-  var foundAssist = false;
-  const children = squareDOM[0].children;
-  for (const child of children) {
-    if (child.className.includes(ASSIST_CLASS)) {
-      foundAssist = true;
-      child.innerHTML = ASSIST_VALUES[squareIndex];
-    }
-  }
 
-  if (!foundAssist) {
-    const node = document.createElement("div");
-    node.innerHTML = ASSIST_VALUES[squareIndex];
-    node.className = ASSIST_CLASS;
-    squareDOM.append(node);
+function setAssistColor(square, assistValue) {
+  if (assistValue < 0) {
+    // black has advantage on square
+    $(square).css("background", DARK);
+    $(square).css("border-color", LIGHT);
+    $(square).css("color", LIGHT);
+  } else if (assistValue === 0) {
+    // neutral
+    $(square).css("background", SLIGHTLY_LIGHT);
+    $(square).css("border-color", SLIGHTLY_DARK);
+    $(square).css("color", SLIGHTLY_DARK);
+  } else {
+    // white has advantage
+    $(square).css("background", LIGHT);
+    $(square).css("border-color", DARK);
+    $(square).css("color", DARK);
   }
 }
 
@@ -189,12 +203,14 @@ function checkChildrenForAssist(squareDOM, squareIndex) {
     if (child.className.includes(ASSIST_CLASS)) {
       foundAssist = true;
       child.innerHTML = ASSIST_VALUES[squareIndex];
+      setAssistColor(child, ASSIST_VALUES[squareIndex]);
     }
   }
 
   if (!foundAssist) {
     const node = document.createElement("div");
     node.innerHTML = ASSIST_VALUES[squareIndex];
+    setAssistColor(node, ASSIST_VALUES[squareIndex]);
     node.className = ASSIST_CLASS;
     squareDOM.append(node);
   }
@@ -202,7 +218,6 @@ function checkChildrenForAssist(squareDOM, squareIndex) {
 
 function onDrop(source, target, piece, newPos, oldPos, orientation) {
   game.move({ from: source, to: target });
-  console.log(game.fen());
 }
 
 var config = {
@@ -212,5 +227,4 @@ var config = {
   onDrop: onDrop,
 };
 board = new Chessboard("board", config);
-board1 = new Chessboard("board1", config);
-// --- End Example JS ----------------------------------------------------------
+calcAssistValues();
