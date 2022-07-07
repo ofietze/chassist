@@ -1,14 +1,11 @@
 import {
-  Chess,
-  SQUARES,
-  PAWN,
-  ROOK,
-  KING,
-  KNIGHT,
-  QUEEN,
   BISHOP,
+  PAWN,
   PAWN_OFFSETS,
   PIECE_OFFSETS,
+  QUEEN,
+  ROOK,
+  SQUARES,
   SQUARE_MAP,
   WHITE,
 } from "./chess.js";
@@ -121,13 +118,14 @@ function getPieceOffsetIndices(squareIndex, type) {
           const indexOfField = getKeyByValue(SQUARES, field);
           indicesToMark.push(indexOfField);
           if (board.position()[field] != null) {
-            break; // found a piec that blocks this path from now on
+            break; // found a piece that blocks this path from now on
           }
         } else {
           break; // We are out of bounds and dont need to search this direction further
         }
       }
     } else {
+      // For these pieces we just need to iterate through their possible moves
       const currentOffset = squareMapVal + PIECE_OFFSETS[type][index];
       if (!(currentOffset & 0x88)) {
         // Useful way to check if offset is in SQUARE_MAP
@@ -142,25 +140,20 @@ function getPieceOffsetIndices(squareIndex, type) {
 
 // Go through all squares and check for pieces. For each piece mark all the squares it defends
 function calcAssistValueForPieceOnSquare(squareIndex) {
-  var content = board.position()[SQUARES[squareIndex]];
-  if (content) {
-    content = content.toLowerCase().split("");
+  var squareContent = board.position()[SQUARES[squareIndex]];
+  if (squareContent) {
+    squareContent = squareContent.toLowerCase().split("");
     var indicesToMark = [];
-    switch (content[1]) {
-      case PAWN:
-        indicesToMark.push(...getPawnOffsetIndices(squareIndex, content[0]));
-        break;
-      case KNIGHT:
-      case BISHOP:
-      case ROOK:
-      case QUEEN:
-      case KING:
-        indicesToMark.push(...getPieceOffsetIndices(squareIndex, content[1]));
-        break;
-      default:
-        break;
+    if (squareContent[1] === PAWN) {
+      indicesToMark.push(
+        ...getPawnOffsetIndices(squareIndex, squareContent[0])
+      );
+    } else {
+      indicesToMark.push(
+        ...getPieceOffsetIndices(squareIndex, squareContent[1])
+      );
     }
-    marklndeces(indicesToMark, content[0]);
+    marklndeces(indicesToMark, squareContent[0]);
   }
 }
 
@@ -192,7 +185,7 @@ function setAssistColor(square, assistValue) {
 
 function checkChildrenForAssist(squareDOM, squareIndex) {
   if (squareDOM.length < 1) {
-    return; // skip when calles before board is rendered
+    return; // skip when called before board is rendered
   }
   var foundAssist = false;
   const children = squareDOM[0].children;
