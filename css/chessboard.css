@@ -76,11 +76,11 @@ body {
   border-radius: 50%;
   border-color: #000;
   background: #fff;
-
   color: #000;
-
   margin: 1px 1px 1px 1px;
-  font-family: "Arial";
+  font-size: 0.8rem;
+
+  z-index: 1; /* To never be behind the pieces */
 }
 
 img {
