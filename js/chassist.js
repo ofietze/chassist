@@ -192,14 +192,14 @@ function checkChildrenForAssist(squareDOM, squareIndex) {
   for (const child of children) {
     if (child.className.includes(ASSIST_CLASS)) {
       foundAssist = true;
-      child.innerHTML = ASSIST_VALUES[squareIndex];
+      child.innerHTML = Math.abs(ASSIST_VALUES[squareIndex]);
       setAssistColor(child, ASSIST_VALUES[squareIndex]);
     }
   }
 
   if (!foundAssist) {
     const node = document.createElement("div");
-    node.innerHTML = ASSIST_VALUES[squareIndex];
+    node.innerHTML = Math.abs(ASSIST_VALUES[squareIndex]);
     setAssistColor(node, ASSIST_VALUES[squareIndex]);
     node.className = ASSIST_CLASS;
     squareDOM.append(node);

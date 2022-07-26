@@ -66,6 +66,37 @@ body {
   font-family: monospace;
 }
 
+img {
+  position: absolute;
+}
+
+p {
+  width: 30rem;
+  text-align: justify;
+}
+
+input {
+  color: #000;
+  width: 85%;
+  padding: 0.5rem;
+}
+button {
+  color: #000;
+}
+
+select {
+  width: 31.25rem;
+  color: #000;
+}
+
+#board {
+  width: 30rem;
+}
+
+#input {
+  width: 30rem;
+}
+
 .assist {
   position: absolute;
   right: 0px;
@@ -81,30 +112,6 @@ body {
   font-size: 0.8rem;
 
   z-index: 1; /* To never be behind the pieces */
-}
-
-img {
-  position: absolute;
-}
-
-#board {
-  width: 30rem;
-}
-
-input {
-  width: 30rem;
-  color: #000;
-  padding: 0.5rem;
-}
-button {
-  color: #000;
-  width: 15rem;
-}
-
-select {
-  width: 31.25rem;
-  padding: 0.5rem;
-  color: #000;
 }
 
 #xBtn {
